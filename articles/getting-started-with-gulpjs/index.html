@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Getting Started with GulpJS - Michael Wales</title>
+    <meta name="author" content="Michael Wales">
+    <meta name="description" content="With over 13 years developing web applications for the US Department of Defense and Intelligence communities, Michael Wales shares his unique perspective on a variety of web development and technology topics.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/bower_components/normalize-css/normalize.css">
+    <link rel="stylesheet" href="/bower_components/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="/bower_components/highlightjs/styles/github.css">
+    <link rel="stylesheet" href="/styles/style.css">
+
+    <script type="text/javascript" src="//use.typekit.net/byn8skt.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+</head>
+
+<body class="page">
+    <div class="sidebar">
+        <header class="header">
+            <h1 class="header-title"><a href="/">
+                <span>M</span>ichael <span>W</span>ales
+            </a></h1>
+            <h2 class="header-subtitle">Full-Stack Web Developer &amp; Open Source Advocate</h2>
+        </header>
+
+        <nav>
+            <ul class="nav">
+                <li class="nav-item">
+                   <a href="/resume/" title="Resume"><i class="ion-document-text"></i><span>Resume</span></a>
+                </li>
+                <li class="nav-item">
+                    <a href="/about/" title="About"><i class="ion-information-circled"></i><span>About</span></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <main>
+        <article class="post">
+            
+    <h1 class="post-title"><a href="/articles/getting-started-with-gulpjs/">Getting Started with GulpJS</a></h1>
+    <time class="post-date" datetime="2014-02-12">12 Feb</time>
+
+    <p>Like many others, I incorporated a task runner (namely <a href="http://gruntjs.com/">GruntJS</a>) into my workflow some time ago. If you tend to use &quot;preprocessed languages&quot; like <a href="http://coffeescript.org/">CoffeeSript</a>, <a href="http://lesscss.org/">LESS</a> or <a href="http://sass-lang.com/">Sass</a> it&#39;s virtually a requirement in maintaining your sanity. Although I prefer sticking to vanilla JavaScript and CSS, introducing this step into my development cycle has certainly paid off in man-hours saved alone. Tasks such as linting or minification during the build process, previously requiring text editor plugins or an array of terminal commands to remember, are now diminished to mere after-thoughts. Best of all, these tasks can now be versioned within your project&#39;s repository ensuring a consistent result despite varying environments in which a task may be run.</p>
+<p><img src="grunt-logo.png" class="align-right" width="200">For some time now, GruntJS has been the de-facto task runner. It&#39;s <a href="http://gruntjs.com/plugins">plugin respository</a> boasts more than 2,200 available plugins, 27 of which are officially maintained by the GruntJS team and cover the most common of tasks such as <a href="https://npmjs.org/package/grunt-contrib-jshint">running JSHint</a>, <a href="https://npmjs.org/package/grunt-contrib-concat">concatenating files</a>, <a href="https://npmjs.org/package/grunt-contrib-coffee">compiling CoffeeScript</a> and much more. Nevertheless, the developers at <a href="http://wearefractal.com/">Fractal</a> felt the need for an additional option, pairing their own unique ideas with <a href="http://nodejs.org/api/stream.html">NodeJS&#39; Streams API</a>.</p>
+<p><img src="gulp-logo.png" class="align-left" width="100">Their efforts have resulted in <a href="http://gulpjs.com/">Gulp</a>, an amazingly fast task runner, and it&#39;s gained quite a following amongst developers with nearly <a href="http://gulpjs.com/plugins">300 plugins of its own</a>. Not only do Gulp tasks execute much quicker than comparative Grunt tasks, but I&#39;ve found the process of actually writing tasks much simpler. I spend less time managing a project&#39;s supporting toolset, allowing me to focus on the most important goal: shipping.</p>
+<p>Unlike Grunt, in which tasks are defined via a rather verbose configuration API, in Gulp you&#39;re just writing plain ol&#39; JavaScript - you <em>program</em> your tasks, rather than <em>configure</em> them. Consider the following <code>gruntfile.js</code> that runs JSHint, minifies and concatenates every JavaScript file within a directory:</p>
+<pre><code class="lang-javascript">module.exports = <span class="function"><span class="keyword">function</span><span class="params">(grunt)</span> {</span>
+    grunt.initConfig({
+        pkg: grunt.file.readJSON(<span class="string">'package.json'</span>),
+
+        jshint: {
+            files: [<span class="string">'src/js/*.js'</span>],
+            options: {
+                jshintrc: <span class="literal">true</span>
+            }
+        },
+
+        concat: {
+            build: {
+                src: [<span class="string">'src/js/*.js'</span>],
+                dest: <span class="string">'build/app.js'</span>
+            }
+        },
+
+        uglify: {
+            build: {
+                files: {
+                    <span class="string">'build/app.min.js'</span>: [<span class="string">'&lt;%= concat.build.dest %&gt;'</span>]
+                }
+            }
+        }
+    });
+
+    grunt.loadNpmTasks(<span class="string">'grunt-contrib-jshint'</span>);
+    grunt.loadNpmTasks(<span class="string">'grunt-contrb-concat'</span>);
+    grunt.loadNpmTasks(<span class="string">'grunt-contrib-uglify'</span>);
+
+    grunt.registerTask(<span class="string">'default'</span>, [<span class="string">'jshint'</span>, <span class="string">'concat'</span>, <span class="string">'uglify'</span>]);
+};
+</code></pre>
+<p>To do the same, using Gulp:</p>
+<pre><code class="lang-javascript"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>),
+    jshint = <span class="built_in">require</span>(<span class="string">'gulp-jshint'</span>),
+    concat = <span class="built_in">require</span>(<span class="string">'gulp-concat'</span>),
+    uglify = <span class="built_in">require</span>(<span class="string">'gulp-uglify'</span>);
+
+gulp.task(<span class="string">'jshint'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+    gulp.src(<span class="string">'src/js/*.js'</span>)
+        .pipe(jshint())
+        .pipe(jshint.reporter(<span class="string">'default'</span>)); 
+});
+
+gulp.task(<span class="string">'build'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+    <span class="keyword">return</span> gulp.src(<span class="string">'src/js/*.js'</span>)
+        .pipe(concat(<span class="string">'build/app.js'</span>))
+        .pipe(uglify())
+        .pipe(gulp.dest(<span class="string">'build/app.min.js'</span>));
+});
+
+gulp.task(<span class="string">'default'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+    gulp.run(<span class="string">'jshint'</span>, <span class="string">'build'</span>); 
+});
+</code></pre>
+<p>I find this much easier to understand and, more importantly, modify. Rather than worry about performing a task within the strict confines of an API, which often leads to temporary directories and files as tasks become dependent upon the output of other tasks, we&#39;re just piping streams through modification functions. There&#39;s no need to distinguish between a plugin&#39;s native tasks and the project&#39;s tasks - a task is a task is a task.</p>
+<p>If you&#39;d like to give Gulp a spin, perhaps rewrite one of your own Gruntfiles (don&#39;t worry, the two can live side-by-side without conflict), the installation is just as simple as most other node packages.</p>
+<p>First, install gulp globally:</p>
+<pre><code class="lang-shell">npm install -g gulp
+</code></pre>
+<p>Then, install gulp and gulp-util in your project&#39;s devDependenies:</p>
+<pre><code class="lang-shell">npm install --save-dev gulp gulp-util
+</code></pre>
+
+
+        </article>
+    </main>
+
+    <footer>
+
+    </footer>
+
+    <script src="/bower_components/highlightjs/highlight.pack.js"></script>
+    <script src="/scripts/app.min.js"></script>
+</body>
+</html>
