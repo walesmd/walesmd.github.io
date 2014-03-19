@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Make .gitconfig Work for You - Michael Wales</title>
+    <meta name="author" content="Michael Wales">
+    <meta name="description" content="With over 13 years developing web applications for the US Department of Defense and Intelligence communities, Michael Wales shares his unique perspective on a variety of web development and technology topics.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/bower_components/normalize-css/normalize.css">
+    <link rel="stylesheet" href="/bower_components/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="/bower_components/highlightjs/styles/github.css">
+    <link rel="stylesheet" href="/styles/style.css">
+
+    <script type="text/javascript" src="//use.typekit.net/byn8skt.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+</head>
+
+<body class="page" itemscope itemtype="//schema.org/Blog">
+    <div class="sidebar">
+        <header class="header" itemscope itemtype="//schema.org/Person">
+            <h1 class="header-title" itemprop="name"><a href="/">
+                <span>M</span>ichael <span>W</span>ales
+            </a></h1>
+            <h2 class="header-subtitle" itemprop="jobTitle">Full-Stack Web Developer &amp; Open Source Advocate</h2>
+        </header>
+
+        <nav>
+            <ul class="nav">
+                <li class="nav-item">
+                   <a href="/resume/" title="Resume"><i class="ion-document-text"></i><span>Resume</span></a>
+                </li>
+                <li class="nav-item">
+                    <a href="/about/" title="About"><i class="ion-information-circled"></i><span>About</span></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <main>
+        
+<article class="post" itemscope itemtype="//schema.org/BlogPosting">
+    <h1 class="post-title" itemprop="name"><a href="/articles/make-gitconfig-work-for-you/">Make .gitconfig Work for You</a></h1>
+    <time class="post-date" datetime="2014-03-19" itemprop="datePublished">19 Mar</time>
+
+    <p><a href="http://git-scm.com/">Git</a> has undoubtedly become one of the most important tools within any Web Developer&#39;s bag of tricks, arguably due to amazing success of <a href="http://github.com/">GitHub</a>. Unfortunately, Git can be quite overwhelming - particularly for those developers new to <em>distributed</em> version control systems.</p>
+<p>This complexity leads some developers to seek out graphical Git clients to assist them in managing their workflow correctly. Although there are a great number of excellent GUI-based clients, I&#39;ve always enjoyed using the command line instead. It&#39;s through the command line tools that Git&#39;s true power, and flexibility, shine through and today I&#39;d like to discuss one of Git&#39;s strongest &quot;utilities&quot;: the <code>.gitconfig</code> file.</p>
+<p>A <code>.gitconfig</code> file can reside in up to three locations within your filesystem, the location determining the scope in which the file&#39;s contents are considered:</p>
+<ul>
+<li>Global (&#39;~/.gitconfig`): The most common use, establishes global configuration options for a particular user.</li>
+<li>System (<code>/etc/.gitconfig</code>): Rarely used, establishes configuration options for the entirety of the local system (all users on this computer).</li>
+<li>Local (<code>~/Projects/this-project/.gitconfig</code>): A the repository level, establishes configuration options that only affect this repository. If this file were committed, the settings contained within would impact all users that clone this repository.</li>
+</ul>
+<p>Since we&#39;re primarily interested in making configuration changes that will make our own lives easier, without affecting other users, we&#39;ll focus on the global <code>.gitconfig</code> file. You should first check to see if you have a <code>.gitconfig</code> file within your home directory and create one if you do not (Unix commands provided, Windows users should make the appropriate modifications as necessary):</p>
+<pre><code class="lang-shell">$ cat ~/.gitconfig
+cat: /Users/mike/.gitconfig: No such file or directory
+
+$ touch ~/.gitconfig
+</code></pre>
+<h2 id="common-endpoint-shortcuts">Common Endpoint Shortcuts</h2>
+<p>Although GitHub is by far the most popular place to host a repository there are a number of other options. <a href="http://bitbucket.org/">BitBucket</a> is a popular provider for many businesses, primarily because their pricing model focuses on number of users rather than if a repository is public or private (in other words, unlimited free private repositories). <a href="http://gist.github.com/">Gist</a>, a GitHub service, is great for hosting quick snippets of code that don&#39;t really need to be associated with a huge project - each snippet is its own fully functional repository.</p>
+<p>Throughout the course of a day, I could be interacting with repositories from a number of providers. Having to type out the full URL, and undoubtedly fat-fingering those URLs a few times, would not only be a huge annoyance but could actually kill off a few precious minutes each and every day. Fortunately, we can configure shortcuts within our <code>.gitconfig</code> file using the <code>url.insteadOf</code> setting. In the following examples, I have configure the <code>gh:</code>, <code>bb:</code> and <code>gist:</code> shortcuts to point to their full URL:</p>
+<pre><code class="lang-ini">[url &quot;https://github.com/&quot;]
+    insteadOf = gh:
+
+[url &quot;https://gist.github.com/&quot;]
+    insteadOf = gist:
+
+[url &quot;https://bitbucket.org/&quot;]
+    insteadOf = bb:
+</code></pre>
+<p>With this configuration in place, here&#39;s how I would then clone a few example repositories (notice how I&#39;m only having to concern myself with the namespace and project name of the repository I am cloning):</p>
+<pre><code class="lang-shell">$ git clone gh:walesmd/walesmd.github.io
+
+$ git clone gist:walesmd/7315613
+
+$ git clone bb:walesmd/codeigniter-erkana-auth
+</code></pre>
+<h2 id="colored-output">Colored Output</h2>
+<p>If you&#39;ve put a lot of hard work into building out the perfect shell prompt, like I have (a topic for a future post) you may find Git&#39;s monochromatic responses to be a bit dull. Not only does coloring provide an aesthetic appeal it can prove to be quite functional as well. We instinctively associate the color green with success or that everything is okay; inversely, red indicates a warning or a problem. I&#39;ve configured a number of various colors within my own <code>.gitconfig</code> to help me easily identify changes to a repository, identify branches and more.</p>
+<pre><code class="lang-ini">[color]
+    ui = true
+
+[color &quot;branch&quot;]
+    current = yellow reverse
+    local = yello
+    remote = green
+
+[color &quot;diff&quot;]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+
+[color &quot;status&quot;]
+    added = yellow
+    changed = green
+    untracked = red
+</code></pre>
+<h2 id="aliases">Aliases</h2>
+<p>My first introduction to distributed version control was with <a href="http://mercurial.selenic.com/">Mercurial</a>, whose commands come with a number of shortcuts (<code>ci</code> for commit, <code>br</code> to list branches, etc). A number of these shortcuts were muscle memory by the time I made the transition to Git, so I needed a way to port these various shortcuts over. Once again, Git promises to deliver in the form of aliases.</p>
+<p>You may have seen various aliases provided in other articles, typically in the form of a single command within your shell. <code>git config --global alias.ci commit</code>, for example creates a new alias (<code>ci</code>) associated with <code>commit</code>. But, did you know these commands aren&#39;t doing anything that special or magical to your Git environment? In fact, <code>git config</code> is simply a command to read and write to various config files, <code>.gitconfig</code> included (and with the <code>--global</code> switch, we make sure we&#39;re editing <code>~/.gitconfig</code>).</p>
+<p>Below I&#39;ve provided a number of my favorite aliases, with inline comments to futher explain those that may be a bit confusing. As you review this list, take note of any alias definitions that are preceded by a <code>!</code>. This tells git to run that entire command is if it had been entered directly within a shell and is required if you are piping results or running multiple commands:</p>
+<pre><code class="lang-ini">[alias]
+    # Add and remove all changes, note how this alias is calling another alias
+    addremove = !git r &amp;&amp; git add . --all
+
+    # Show all of my configured aliases
+    aliases = !git config --list | grep 'alias\\.' | sed 's/alias\\.\\([^=]*\\)=\\(.*\\)/\\1\\ \t =&gt; \\2/' | sort
+
+    # For when you made that commit a bit too early, amend
+    amend = !git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend
+
+    # Show all branches
+    br = branch -av
+
+    # Show the current branch name (usefull for shell prompts)
+    brname = !git branch | grep "^*" | awk '{ print $2 }'
+
+    # Delete a branch
+    brdel = branch -D
+
+    # Which files are receiving the most "love"
+    churn = !git log --all -M -C --name-only --format='format:' "$@" | sort | grep -v '^$' | uniq -c | sort | awk 'BEGIN {print "count,file"} {print $1 "," $2}'
+
+    # View the log and diff for a commit (previous if no SHA1 provided)
+    details = log -n1 -p --format=fuller
+
+    # Save a repo as a tarball
+    export = archive -o latest.tar.gz -9 --prefix=latest/
+
+    # Unstage changes from the index
+    unstage = reset HEAD --
+
+    # View a pretty git log with branch tree
+    g = !git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)&lt;%an&gt;%Creset' --abbrev-commit --date=relative
+
+    # Return a list of commit SHA1s
+    l = "!f() { git log $* | grep '^commit ' | cut -f 2 -d ' '; }; f"
+
+    # Remove deleted files
+    r = !git ls-files -z --deleted | xargs -0 git rm
+
+    # Return the repository's root directory (usefull for shell prompts)
+    root = rev-parse --show-toplevel
+
+    # Update all submodules
+    subup = submodule update --init
+
+    # List all tags
+    tags = tag -l
+
+    # Start a new local repository and perform initial commit
+    this = !git init &amp;&amp; git add . &amp;&amp; git commmit -m \"Initial commit.\"
+
+    # Thin out older metadata within the repository, reduceses filesystem footprint
+    trim = !git reflog expire --expire=now --all &amp;&amp; git gc --prune=now
+</code></pre>
+<h2 id="my-complete-gitconfig-">My Complete <code>.gitconfig</code></h2>
+<p>I haven&#39;t covered every single entry within my <code>.gitconfig</code> file, just what I believe have been some of the most helpful changes I&#39;ve made. If you&#39;re interested in reviewing my entire file, I present to you:</p>
+<pre><code class="lang-ini">[alias]
+    addremove = !git r &amp;&amp; git add . --all
+    aliases = !git config --list | grep 'alias\\.' | sed 's/alias\\.\\([^=]*\\)=\\(.*\\)/\\1\\ \t =&gt; \\2/' | sort
+    all = add . --all
+    amend = !git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend
+    br = branch -av
+    brname = !git branch | grep "^*" | awk '{ print $2 }'
+    brdel = branch -D
+    ci = commit
+    changes = "!f() { git log --pretty=format:'* %s' $1..$2; }; f"
+    churn = !git log --all -M -C --name-only --format='format:' "$@" | sort | grep -v '^$' | uniq -c | sort | awk 'BEGIN {print "count,file"} {print $1 "," $2}'
+    co = checkout
+    details = log -n1 -p --format=fuller
+    export = archive -o latest.tar.gz -9 --prefix=latest/
+    unstage = reset HEAD --
+    g = !git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)&lt;%an&gt;%Creset' --abbrev-commit --date=relative
+    in = pull --dry-run
+    l = "!f() { git log $* | grep '^commit ' | cut -f 2 -d ' '; }; f"
+    out = log --branches --not --remotes
+    r = !git ls-files -z --deleted | xargs -0 git rm
+    root = rev-parse --show-toplevel
+    st = status
+    subup = submodule update --init
+    tags = tag -l
+    this = !git init &amp;&amp; git add . &amp;&amp; git commit -m \"Initial commit.\"
+    trim = !git reflog expire --expire=now --all &amp;&amp; git gc --prune=now
+
+[credential]
+    helper = osxkeychain
+
+[color]
+    ui = true
+
+[color "branch"]
+    current = yellow reverse
+    local = yellow
+    remote = green
+
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+
+[color "status"]
+    added = yellow
+    changed = green
+    untracked = red
+
+[core]
+    autocrlf = input
+    compression = 9
+    excludesfile = ~/.gitignore_global
+    filemode = false
+
+[diff]
+    mnemonicprefix = true
+
+[merge]
+    log = true
+    ff = false
+
+[push]
+    default = simple
+
+[url "https://bitbucket.org/"]
+    insteadOf = bb:
+
+[url "https://github.com/"]
+    insteadOf = gh:
+
+[url "https://gist.github.com/"]
+    insteadOf = gist:
+
+[user]
+    name = Michael Wales
+    email = webmaster@michaelwales.com
+</code></pre>
+
+</article>
+
+    </main>
+
+    <footer>
+
+    </footer>
+
+    <script src="/bower_components/highlightjs/highlight.pack.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-38735621-1', 'michaelwales.com');
+        ga('send', 'pageview');
+    </script>
+</body>
+</html>
