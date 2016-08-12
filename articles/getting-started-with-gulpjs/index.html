@@ -48,7 +48,7 @@
 <p><img src="grunt-logo.png" class="align-right" width="200">For some time now, GruntJS has been the de-facto task runner. It&#39;s <a href="http://gruntjs.com/plugins">plugin respository</a> boasts more than 2,200 available plugins, 27 of which are officially maintained by the GruntJS team and cover the most common of tasks such as <a href="https://npmjs.org/package/grunt-contrib-jshint">running JSHint</a>, <a href="https://npmjs.org/package/grunt-contrib-concat">concatenating files</a>, <a href="https://npmjs.org/package/grunt-contrib-coffee">compiling CoffeeScript</a> and much more. Nevertheless, the developers at <a href="http://wearefractal.com/">Fractal</a> felt the need for an additional option, pairing their own unique ideas with <a href="http://nodejs.org/api/stream.html">NodeJS&#39; Streams API</a>.</p>
 <p><img src="gulp-logo.png" class="align-left" width="100">Their efforts have resulted in <a href="http://gulpjs.com">Gulp</a>, an amazingly fast task runner, and it&#39;s gained quite a following amongst developers with nearly <a href="http://gulpjs.com/plugins">300 plugins of its own</a>. Not only do Gulp tasks execute much quicker than comparative Grunt tasks, but I&#39;ve found the process of actually writing tasks much simpler. I spend less time managing a project&#39;s supporting toolset, allowing me to focus on the most important goal: shipping.</p>
 <p>Unlike Grunt, in which tasks are defined via a rather verbose configuration API, in Gulp you&#39;re just writing plain ol&#39; JavaScript - you <em>program</em> your tasks, rather than <em>configure</em> them. Consider the following <code>gruntfile.js</code> that runs JSHint, minifies and concatenates every JavaScript file within a directory:</p>
-<pre><code class="lang-javascript">module.exports = <span class="function"><span class="keyword">function</span><span class="params">(grunt)</span> {</span>
+<pre><code class="lang-javascript"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params">grunt</span>) </span>{
     grunt.initConfig({
         pkg: grunt.file.readJSON(<span class="string">'package.json'</span>),
 
@@ -88,20 +88,20 @@
     concat = <span class="built_in">require</span>(<span class="string">'gulp-concat'</span>),
     uglify = <span class="built_in">require</span>(<span class="string">'gulp-uglify'</span>);
 
-gulp.task(<span class="string">'jshint'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+gulp.task(<span class="string">'jshint'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>{
     gulp.src(<span class="string">'src/js/*.js'</span>)
         .pipe(jshint())
         .pipe(jshint.reporter(<span class="string">'default'</span>)); 
 });
 
-gulp.task(<span class="string">'build'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+gulp.task(<span class="string">'build'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>{
     <span class="keyword">return</span> gulp.src(<span class="string">'src/js/*.js'</span>)
         .pipe(concat(<span class="string">'build/app.js'</span>))
         .pipe(uglify())
         .pipe(gulp.dest(<span class="string">'build/app.min.js'</span>));
 });
 
-gulp.task(<span class="string">'default'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+gulp.task(<span class="string">'default'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>{
     gulp.run(<span class="string">'jshint'</span>, <span class="string">'build'</span>); 
 });
 </code></pre>
