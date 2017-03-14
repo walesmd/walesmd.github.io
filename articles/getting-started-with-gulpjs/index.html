@@ -50,25 +50,25 @@
 <p>Unlike Grunt, in which tasks are defined via a rather verbose configuration API, in Gulp you&#39;re just writing plain ol&#39; JavaScript - you <em>program</em> your tasks, rather than <em>configure</em> them. Consider the following <code>gruntfile.js</code> that runs JSHint, minifies and concatenates every JavaScript file within a directory:</p>
 <pre><code class="lang-javascript"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params">grunt</span>) </span>{
     grunt.initConfig({
-        pkg: grunt.file.readJSON(<span class="string">'package.json'</span>),
+        <span class="attr">pkg</span>: grunt.file.readJSON(<span class="string">'package.json'</span>),
 
-        jshint: {
-            files: [<span class="string">'src/js/*.js'</span>],
-            options: {
-                jshintrc: <span class="literal">true</span>
+        <span class="attr">jshint</span>: {
+            <span class="attr">files</span>: [<span class="string">'src/js/*.js'</span>],
+            <span class="attr">options</span>: {
+                <span class="attr">jshintrc</span>: <span class="literal">true</span>
             }
         },
 
-        concat: {
-            build: {
-                src: [<span class="string">'src/js/*.js'</span>],
-                dest: <span class="string">'build/app.js'</span>
+        <span class="attr">concat</span>: {
+            <span class="attr">build</span>: {
+                <span class="attr">src</span>: [<span class="string">'src/js/*.js'</span>],
+                <span class="attr">dest</span>: <span class="string">'build/app.js'</span>
             }
         },
 
-        uglify: {
-            build: {
-                files: {
+        <span class="attr">uglify</span>: {
+            <span class="attr">build</span>: {
+                <span class="attr">files</span>: {
                     <span class="string">'build/app.min.js'</span>: [<span class="string">'&lt;%= concat.build.dest %&gt;'</span>]
                 }
             }
