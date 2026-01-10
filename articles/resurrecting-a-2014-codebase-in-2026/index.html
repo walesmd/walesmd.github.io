@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Resurrecting a 2014 Codebase in 2026 - Michael Wales</title>
+    <meta name="author" content="Michael Wales">
+    <meta name="description" content="With over 18 years developing web applications for the US Department of Defense and Intelligence communities, Michael Wales shares his unique perspective on a variety of web development and technology topics.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/styles/normalize.css">
+    <link rel="stylesheet" href="/styles/ionicons.min.css">
+    <link rel="stylesheet" href="/styles/prism-github.css">
+    <link rel="stylesheet" href="/styles/style.css">
+
+    <script type="text/javascript" src="https://use.typekit.net/byn8skt.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+</head>
+
+<body class="page" itemscope itemtype="//schema.org/Blog">
+    <div class="sidebar">
+        <header class="header" itemscope itemtype="//schema.org/Person">
+            <h1 class="header-title" itemprop="name"><a href="/">
+                <span>M</span>ichael <span>W</span>ales
+            </a></h1>
+            <h2 class="header-subtitle" itemprop="jobTitle">Full-Stack Web Developer &amp; Open Source Advocate</h2>
+        </header>
+
+        <nav>
+            <ul class="nav">
+                <li class="nav-item">
+                   <a href="/resume/" title="Resume"><i class="ion-document-text"></i><span>Resume</span></a>
+                </li>
+                <li class="nav-item">
+                    <a href="/about/" title="About"><i class="ion-information-circled"></i><span>About</span></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <main>
+        
+<article class="post" itemscope itemtype="//schema.org/BlogPosting">
+    <h1 class="post-title" itemprop="name"><a href="/articles/resurrecting-a-2014-codebase-in-2026/">Resurrecting a 2014 Codebase in 2026</a></h1>
+    <time class="post-date" datetime="2026-01-10" itemprop="datePublished">10 Jan 2026</time>
+
+    <p>For many developers, software projects never truly die - they just become harder and harder to touch. The code still exists; the ideas still matter; the content or functionality still has value. What disappears first is the ability to reasonably maintain that code. Over time, dependencies rot, build tools get abandoned, and the cognitive cost of even small changes steadily rises until the only sensible option seems to be &quot;don’t touch it.&quot; That was the state of this blog - not broken in concept, but brittle and immobilized under a decade of technical debt.</p>
+<p>For years, this blog has had outdated information - locations, employers, etc. Simply because the technical overhead in getting things functional again didn't outweigh my other responsibilities nor the ability to just edit the source in Dev Tools and print to PDF whenever I needed a current resume.</p>
+<p>When I set out to revive this blog, I wasn’t trying to resurrect a nostalgia project. What I was confronting was a classic technical debt problem: the system was stable enough to serve pages but too fragile to evolve. It was built on <a href="http://wintersmith.io/">Wintersmith</a>, a static site generator that hasn’t seen meaningful maintenance in years; it used <a href="https://bower.io/">Bower</a> for front-end dependencies; it relied on <a href="https://momentjs.com/">Moment.js</a> for dates; and it had no modern deployment pipeline. Any attempt to update a post or add a new feature would require untangling all of these brittle pieces first. In other words, it was trapped in its own legacy. I wanted to see whether an AI assistant could help liberate it.</p>
+<p>The approach I took with <a href="https://claude.com/product/claude-code">Claude Code</a> was not to ask for guides or to tell it what the new architecture should look like, but to provide the entire repository and a single directive: make this buildable and deployable again on contemporary tooling. What followed was a migration process that, by traditional measures, would have taken a developer at least a few days of uninterrupted work - possibly longer if they needed to reacquaint themselves with tools that haven’t been in common use for years.</p>
+<p>The first substantive change the AI applied was migrating away from Wintersmith to <a href="https://www.11ty.dev/">Eleventy</a> 3.x. Eleventy has emerged as a robust, versatile static site generator that embraces simplicity and extensibility, making it an excellent destination for this kind of project. Claude reconstructed the directory structure into Eleventy’s conventions, organized templates into <code>_includes</code>, applied readable date handling with <a href="https://moment.github.io/luxon/#/">Luxon</a> instead of Moment, and rewrote syntax highlighting to use build-time <a href="https://prismjs.com/">Prism</a> rather than client-side <code>highlight.js</code>. Every one of these decisions reflects a modernization that reduces runtime complexity and improves maintainability.</p>
+<p>At every step, the AI had to reason about context that typically only a human engineer would understand. When Eleventy failed to build because templates couldn’t find <code>base.njk</code>, the system identified that Wintersmith’s layout placement did not align with Eleventy’s <a href="https://mozilla.github.io/nunjucks/">Nunjucks</a> lookup paths and moved the files into a structure Eleventy expects. When initial GitHub Actions failed to trigger because the workflow was configured to watch the <code>main</code> branch while the repository’s default branch was <code>master</code>, Claude detected and corrected the discrepancy. Later, when the static site was being published to the wrong branch for GitHub Pages, the deploy workflow was updated to publish to <code>master</code> instead of <code>main</code> so that Pages would correctly serve the updated content. These are the kinds of integration and platform details that usually require reading documentation, trial and error, or painful debugging sessions; the AI internalized and applied them in real time.</p>
+<p>Along the way, the repository was cleaned up: thousands of lines of obsolete configuration and unused assets were removed, replaced by a leaner, more modern codebase that reflected current best practices. A GitHub Actions workflow was introduced that builds and deploys the site automatically on push, eliminating the need for manual scripts.</p>
+<p>The reason this matters is not because I was able to publish a blog post - it’s that a realistic, non-toy codebase was migrated, modernized, and restored to a state where it can be meaningfully improved again. Most abandoned projects don’t fail outright; they erode incrementally, and this erosion accumulates into a threshold beyond which no one wants to touch the code for fear of breaking something that nobody understands. Tools rot. Build processes become inscrutable. Developers forget the original mental model. What once might have taken a weekend of yak-shaving now can be addressed without painful context switching.</p>
+<p>What this experience highlights is an evolution in developer productivity that goes beyond code generation. It’s not always about asking an AI assistant to write a new feature from scratch - it can be about using AI to restore the ability to reason about and work with existing systems. It can be about bringing a legacy codebase back into a form where the cost of change is low again. That unlocks a spectrum of opportunity: documentation sites that can finally be updated, internal tools that can be maintained without fear, prototypes that can be evolved into products, and so on. Instead of writing new code to replace old systems, we can now consider reviving them with far less investment than would have been plausible even a year ago.</p>
+<p>This isn’t automation in the sense of replacing the developer. Throughout the process, I reviewed diffs, made architectural choices, accepted or rejected decisions based on intent and context. What the AI handled was the heavy lifting - the tedious, error-prone migrations and integration tweaks that typically occupy the margins of every significant change. With that burden reduced, developers are free to focus on what matters: reasoning about the user experience, the architecture, and the goals of the software itself.</p>
+<h2>Technical Appendix</h2>
+<p>This section exists for the people who want to understand not just that a legacy project was modernized, but how it was done and what kinds of transformations are now feasible with AI-assisted tooling.</p>
+<h3>Repository-Level Modernization</h3>
+<p>The original <code>michaelwales.com</code> repository was structured around Wintersmith, Bower, and hand-rolled shell scripts. Its directory layout looked roughly like this:</p>
+<pre><code>/contents
+/templates
+/plugins
+/bower_components
+/config.json
+/build.sh
+</code></pre>
+<p>This layout assumed:</p>
+<ul>
+<li>a global Wintersmith installation,</li>
+<li>front-end assets fetched via Bower,</li>
+<li>runtime JavaScript for things like syntax highlighting and date formatting,</li>
+<li>and a human running build and deploy scripts locally.</li>
+</ul>
+<p>Claude migrated this into a contemporary Eleventy-based static site with a structure more like:</p>
+<pre><code>/src
+  /_includes
+  /_data
+  /posts
+  /assets
+.eleventy.js
+package.json
+.github/workflows/deploy.yml
+</code></pre>
+<p>This matters because it replaces implicit, tribal-knowledge-based build steps with explicit, reproducible infrastructure. Anyone who clones the repo can now run npm install and npm run build and get the same result, which is a non-negotiable requirement for sustainable software.</p>
+<h3>Template Migration: Wintersmith to Nunjucks (Eleventy)</h3>
+<p>Wintersmith templates were written in a dialect of Nunjucks but organized around layout inheritance rules that Eleventy does not share. For example, Wintersmith allowed templates to reference layouts by name regardless of location, while Eleventy requires layouts to live under <code>_includes</code>.</p>
+<p>Claude didn’t just convert syntax — it re-modeled the template graph.</p>
+<p>A Wintersmith page like this:</p>
+<pre><code>{% extends &quot;layout.html&quot; %}
+{% block content %}
+  &lt;article&gt;
+    &lt;h1&gt;{{ title }}&lt;/h1&gt;
+    {{ contents | safe }}
+  &lt;/article&gt;
+{% endblock %}
+</code></pre>
+<p>Was converted into an Eleventy-compatible version like:</p>
+<pre><code>---
+layout: base.njk
+---
+
+&lt;article&gt;
+  &lt;h1&gt;{{ title }}&lt;/h1&gt;
+  {{ content | safe }}
+&lt;/article&gt;
+</code></pre>
+<p>And the base layout was relocated into: <code>src/_includes/base.njk</code></p>
+<p>So Eleventy’s resolver could actually find it. This is a perfect example of where most migrations stall: the syntax might be &quot;compatible&quot; but the tooling assumptions are not. AI was able to discover, test, and correct those mismatches iteratively.</p>
+<h3>Syntax Highlighting: Runtime to Build Time</h3>
+<p>Originally, syntax highlighting was done in the browser using highlight.js. Claude replaced this with Eleventy’s Prism integration, so code blocks are rendered as HTML during the build.</p>
+<p>Before:</p>
+<ul>
+<li>Browser downloads <code>highlight.js</code></li>
+<li>DOM is scanned</li>
+<li>Code blocks are post-processed</li>
+</ul>
+<p>After:</p>
+<ul>
+<li>Markdown → HTML with Prism classes at build time</li>
+<li>Zero runtime cost</li>
+</ul>
+<p>This again reflects a broader pattern: AI naturally gravitates toward architectures that are simpler to reason about and less fragile in production.</p>
+<h3>GitHub Actions: From Shell Scripts to CI</h3>
+<p>The old deployment flow relied on shell scripts that pushed a built directory to GitHub Pages manually. Claude replaced this with a GitHub Actions workflow:</p>
+<pre><code>name: Build and Deploy Eleventy Site
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run build
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: $
+          publish_dir: ./_site
+          publish_branch: master
+</code></pre>
+<p>Two interesting things happened here:</p>
+<ol>
+<li>The AI initially assumed the default branch was main, then corrected itself when the workflow failed.</li>
+<li>It discovered that GitHub Pages was serving from <code>master</code>, not <code>gh-pages</code>, and updated the deploy target accordingly.</li>
+</ol>
+<p>That kind of &quot;platform awareness&quot; is exactly what makes legacy projects so expensive to maintain — and what AI is now able to absorb.</p>
+<h3>Codebase Shrinkage as a Signal</h3>
+<p>One of the strongest signals of success was the net change in the repository:</p>
+<ul>
+<li>~35,000 lines removed</li>
+<li>~2,000 lines added</li>
+</ul>
+<p>Most of what disappeared was:</p>
+<ul>
+<li>vendored libraries,</li>
+<li>legacy build glue,</li>
+<li>unused scripts,</li>
+<li>obsolete configs.</li>
+</ul>
+<p>What replaced it was:</p>
+<ul>
+<li>a modern dependency graph,</li>
+<li>a single, readable build pipeline,</li>
+<li>and a small, understandable project footprint.</li>
+</ul>
+<p>That ratio is what real modernization looks like.</p>
+<h3>Why This Works Now</h3>
+<p>None of this required &quot;understanding&quot; in the human sense. What the AI brought was something else: the ability to navigate, simulate, and adapt complex systems quickly enough that exploration is cheap.</p>
+<p>This is what makes old codebases newly valuable. They don’t need to be rewritten; they need to be translated forward.</p>
+<p>That’s the real unlock.</p>
+<h3>Some Fun Things to Note</h3>
+<p>I have a lot of experience with AI in the form of OpenAI's/Anthropic's chatbots, or Cursor's/Windsurf's/VSCode's in-IDE experiences, but my history with agentic AI experiences is pretty minimal right now - probably limited to various iterations of <a href="https://github.com/bmad-code-org/BMAD-METHOD">BMAD</a> in all of the tools previously mentioned.</p>
+<p>Claude Code did phenomenally well here and I'm happy with the results, but I was surprised as how quickly I burned through all of my tokens for a 6-hour block of time (Claude Pro). I did use Opus and planning mode for the first prompt or two, until I felt like I understood the plan it was coming up with and trusted it to &quot;just go do things&quot; - more experimentation is in order on my part to figure out the best times to opt-in to the more resource intensive compute.</p>
+
+</article>
+
+    </main>
+
+    <footer>
+
+    </footer>
+</body>
+</html>
