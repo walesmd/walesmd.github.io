@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Michael Wales</title>
+  <subtitle>Engineering Leader and Open Source Advocate</subtitle>
+  <link href="https://michaelwales.com/feed.xml" rel="self"/>
+  <link href="https://michaelwales.com/"/>
+  <updated>2026-06-26T00:00:00Z</updated>
+  <id>https://michaelwales.com/</id>
+  <author>
+    <name>Michael Wales</name>
+  </author>
+  <entry>
+    <title>What Algorithm Runs an Elevator?</title>
+    <link href="https://michaelwales.com/articles/what-algorithm-runs-an-elevator/"/>
+    <updated>2026-06-26T00:00:00Z</updated>
+    <id>https://michaelwales.com/articles/what-algorithm-runs-an-elevator/</id>
+    <content type="html">&lt;p&gt;I was standing in the lobby of my resort at Universal Orlando, waiting for an elevator, when the question caught me. Six cars, a small crowd, buttons lighting up faster than the doors could open. One car sailed past my floor without stopping. The other doubled back for someone who&#39;d pressed &lt;em&gt;down&lt;/em&gt; after I&#39;d pressed &lt;em&gt;up&lt;/em&gt;. And I found myself doing the thing I always do when something in the world won&#39;t leave me alone: wondering exactly how it decides. What&#39;s the logic in there? When two people on different floors both want a car, who wins? Is it just first-come-first-served, or is something cleverer going on?&lt;/p&gt;
+&lt;p&gt;For most of my life, that&#39;s where a question like this goes to die. You feel the itch on vacation, maybe you skim a Wikipedia article on the plane home, and the curiosity quietly evaporates because the gap between &amp;quot;I wonder how this works&amp;quot; and &amp;quot;I actually understand how this works&amp;quot; is wide enough that you never cross it. There&#39;s reading &lt;em&gt;about&lt;/em&gt; a thing, and there&#39;s &lt;em&gt;building&lt;/em&gt; the thing, and the second one is where understanding actually lives — but building used to be expensive enough that you saved it for work.&lt;/p&gt;
+&lt;p&gt;That gap has collapsed. So this time, instead of reading about elevators, I built a little world where I could run them myself.&lt;/p&gt;
+&lt;h2&gt;Not really a game&lt;/h2&gt;
+&lt;p&gt;What I ended up with is, nominally, a browser game: you write a JavaScript function that controls an elevator, run it against a simulated building full of impatient people, watch it play out, and get a score. But &amp;quot;game&amp;quot; undersells what I was actually after. I wanted a &lt;em&gt;learning environment&lt;/em&gt; — something that would let me do three specific things:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Write my own algorithm&lt;/strong&gt; and immediately see whether my intuition was any good. You&#39;re handed a working-but-naive elevator and a code editor; your job is to write the brain that decides where it goes. Run it and watch passengers wait — or not.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Compare it against the algorithms that already exist.&lt;/strong&gt; The classic elevator-scheduling family — FCFS, SSTF, SCAN, LOOK — is built in. I can drop any of them into the editor, run them on the same building, and see their numbers side by side.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Actually &lt;em&gt;see&lt;/em&gt; the difference.&lt;/strong&gt; This was the part I cared most about. The simulation draws the shaft, the cars, and the people waiting on each floor — and the longer someone waits, the more they warm from yellow to red, so you literally watch a bad algorithm strand somebody in the corner while it fusses over closer, easier riders.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That last point is the whole pedagogical bet. It&#39;s one thing to read that &amp;quot;first-come-first-served has poor worst-case latency.&amp;quot; It&#39;s another to watch a single red passenger sit on floor 14, fuming, while your too-greedy car ping-pongs around the lobby. The problem becomes &lt;em&gt;felt&lt;/em&gt; before it becomes a sentence.&lt;/p&gt;
+&lt;h2&gt;The answer I was actually looking for&lt;/h2&gt;
+&lt;p&gt;Here&#39;s what I learned, which is the satisfying part. My resort question — &lt;em&gt;is it just first-come-first-served, or something cleverer?&lt;/em&gt; — turns out to have a real, named answer with decades of computer science behind it.&lt;/p&gt;
+&lt;p&gt;First-come-first-served is the obvious idea, and it&#39;s terrible. It feels fair, but it makes the car thrash up and down the building chasing requests in the order they happened to arrive, blowing past people it&#39;s about to drive directly past. The thing real elevators actually do is called &lt;strong&gt;directional collective control&lt;/strong&gt;, and the canonical version is the &lt;strong&gt;SCAN / LOOK&lt;/strong&gt; family — affectionately, &amp;quot;the elevator algorithm.&amp;quot; The car commits to a direction, &lt;em&gt;shows&lt;/em&gt; you that direction, and serves every call going that way as it passes; if you want to go the other way, you wait for the return sweep. It only turns around when there&#39;s nothing left ahead of it. That single rule — commit to a direction and sweep — is most of why a real elevator feels orderly instead of frantic.&lt;/p&gt;
+&lt;p&gt;And then it gets deeper in exactly the way good problems do. Add a second car and the hard part stops being &amp;quot;where does &lt;em&gt;this&lt;/em&gt; car go&amp;quot; and becomes &lt;em&gt;assignment&lt;/em&gt;: which car should answer which call, so they don&#39;t both lunge for the same person and leave the rest of the building uncovered? Make the building tall and suddenly distance and energy matter as much as wait time, and you&#39;re trading objectives against each other — average wait versus worst-case wait versus floors traveled. There is no single &amp;quot;correct&amp;quot; elevator algorithm. There&#39;s a problem, a set of trade-offs, and a score to beat. That realization — that I&#39;d wandered into a genuine optimization problem, not a trivia answer — was worth the whole trip.&lt;/p&gt;
+&lt;h2&gt;AI as the workshop, not the answer&lt;/h2&gt;
+&lt;p&gt;I want to be precise about the role AI played here, because I think it&#39;s the actually-interesting part and it&#39;s easy to get wrong.&lt;/p&gt;
+&lt;p&gt;I did not ask Claude &amp;quot;how do elevators work&amp;quot; and read the reply. That would have been the Wikipedia path with extra steps, and it would have skipped the only part that teaches you anything — the building. What I did instead was use Claude to construct the &lt;em&gt;environment&lt;/em&gt; in which I could figure it out myself. I told it, in effect, to act as a pedagogy expert and help me build a tool whose entire job was to make me struggle productively: one new idea per level, each level designed so the strategy that won the last one visibly breaks; name the concept but never hand over the code; let me earn the worked solutions only after I&#39;d cleared a level on my own. The tool is opinionated about &lt;em&gt;not&lt;/em&gt; telling me the answer — and I&#39;m the one who pointed it that way.&lt;/p&gt;
+&lt;p&gt;The result is that the loop from &amp;quot;idle curiosity in a hotel lobby&amp;quot; to &amp;quot;interactive thing I can poke at for hours&amp;quot; took a couple of days of nights-and-weekends tinkering, not a couple of months. That compression is the headline. The cost of chasing a question all the way down to a working artifact has dropped far enough that it&#39;s worth doing for its own sake — not for a deliverable, not for work, just because you got curious about an elevator. We talk about AI mostly in terms of shipping features faster. I think the quieter, bigger story is that it makes &lt;em&gt;self-directed learning&lt;/em&gt; cheap: when the world makes you wonder about something, you can now build your way to actually understanding it.&lt;/p&gt;
+&lt;h2&gt;On the fact that better elevator games exist&lt;/h2&gt;
+&lt;p&gt;They do. There are elevator simulators and dispatch games out there that are richer, prettier, and more complete than mine, made by people who&#39;ve spent far longer than four days on them. I want to be honest about that, because I think the honesty is the point rather than a disclaimer.&lt;/p&gt;
+&lt;p&gt;I didn&#39;t build this to compete with anything. I built it to answer &lt;em&gt;my&lt;/em&gt; question, in a way that was engaging to &lt;em&gt;me&lt;/em&gt;, scoped to exactly the things I was curious about and nothing I wasn&#39;t. That&#39;s a different goal than &amp;quot;make the best elevator game,&amp;quot; and it&#39;s a goal that used to be uneconomical — you don&#39;t spin up a bespoke learning tool for an audience of one. Now you can. And because it&#39;s all client-side, runs offline, and lives in the open on &lt;a href=&quot;https://github.com/walesmd/elevator-algorithm-game&quot;&gt;GitHub&lt;/a&gt;, maybe it scratches the same itch for someone else who walked out of a hotel lobby with the same question. If it does, great. If not, I still got exactly what I came for.&lt;/p&gt;
+&lt;p&gt;The elevator, for the record, was almost certainly running LOOK.&lt;/p&gt;
+</content>
+  </entry>
+  <entry>
+    <title>Research at the Hourly Scale</title>
+    <link href="https://michaelwales.com/articles/research-at-the-hourly-scale/"/>
+    <updated>2026-06-24T00:00:00Z</updated>
+    <id>https://michaelwales.com/articles/research-at-the-hourly-scale/</id>
+    <content type="html">&lt;p&gt;Talent is everywhere. Opportunity isn&#39;t. That sentence is most of the reason I joined &lt;a href=&quot;https://www.codepath.org/&quot;&gt;CodePath&lt;/a&gt; as Senior Director of AI Programs, and it sits underneath everything we build. CodePath has spent almost a decade taking first-generation and low-income computing students - most from households earning under $60,000 a year - and getting them into real tech careers, at about a two-in-three rate. The talent was always there. What was missing was a door.&lt;/p&gt;
+&lt;p&gt;The program I&#39;m spending most of my time on right now is Claude Corps, a paid, year-long fellowship we&#39;re running with &lt;a href=&quot;https://www.anthropic.com/&quot;&gt;Anthropic&lt;/a&gt;. We take early-career builders the hiring market would screen out, train them on the AI stack at an intensive in-person Base Camp, then embed them for a year inside nonprofits and mission-driven organizations that need that capability most and can least afford to buy it. CodePath owns the training and the bar for what a fellow can actually do; Anthropic brings the technology and the technical advisors. Every fellow leaves having actually done the job.&lt;/p&gt;
+&lt;p&gt;But this post isn&#39;t really about the program. It&#39;s about &lt;em&gt;how&lt;/em&gt; we built it - and why that&#39;s only possible at a place like CodePath.&lt;/p&gt;
+&lt;p&gt;Before a single real fellow showed up, we ran the first month of the program as a simulation. &lt;a href=&quot;https://michaelwales.com/codepath-sim/&quot;&gt;I wrote up the full thing separately&lt;/a&gt;, but the short version: we built a synthetic cohort - a hundred host organizations, three hundred applicants, fifty mentors, none of them real people - ran our actual selection and matching rules on them, formed the pods, and played the month forward week by week. A wind tunnel for a program design. You&#39;d never fly a plane you&#39;d only ever drawn on a slide.&lt;/p&gt;
+&lt;p&gt;A few things mattered about how it was built. The engine that decides what happens is plain, deterministic rules - no AI improvising outcomes - so every result is an assumption we wrote down and can argue with, and anyone can rerun it and get the same answer. AI wrote only the layer on top: the first-person journal entries that let you feel a fellow&#39;s week instead of reading a spreadsheet, every word pinned to the underlying facts and checked. And a human reviewed every simulated week before the next one ran. The simulation isn&#39;t an oracle; it&#39;s a thinking aid. The people and outcomes in it are synthetic - we say that loudly and up front, because the moment a made-up number gets to pose as a forecast, you&#39;ve lost the plot.&lt;/p&gt;
+&lt;p&gt;What it surfaced was less a verdict than a set of places to look. The pattern that came through most consistently was reassuring: wherever the right person caught a problem in time, the simulated fellow tended to recover - the support model seemed to do its job. The things that gave me pause were the ones support alone didn&#39;t appear to resolve. The clearest was capacity - our planned mentor-to-fellow ratio looked stretched well before any simulated crisis, which &lt;em&gt;suggests&lt;/em&gt; it could be among the first things to buckle under real load. Another we started calling the quiet fellows: a couple of simulated fellows who kept reporting they were fine while falling behind, and weren&#39;t noticed until their work broke. If a pattern like that holds up with real people, it would point to detection, rather than help, as the thing worth investing in early.&lt;/p&gt;
+&lt;p&gt;None of this is settled - it&#39;s a synthetic cohort, not a forecast, and I don&#39;t want to dress up a hypothesis as a finding. But it&#39;s more than enough to act on cheaply: we&#39;re building a proactive, week-one check-in for the people who don&#39;t raise their hand, and we&#39;ll walk into the first real cohort already knowing where to watch. Far better to surface those questions in a model than to first run into them with a real mentor and two dozen real fellows in week three.&lt;/p&gt;
+&lt;p&gt;I think poking at our own design this early is the opposite of embarrassing. I&#39;d be embarrassed to launch a program at real people without stress-testing it first. Every weak point the simulation flags now is a question we get to ask before a real fellow ever lives the answer. Credibility means being the first to look for the holes in your own work.&lt;/p&gt;
+&lt;p&gt;And this is where the hourly-scale thing comes in. At a lot of organizations, &amp;quot;run a simulation to pressure-test a strategic decision&amp;quot; is a quarter-long initiative with a steering committee and a slide deck to justify the time. At CodePath, this kind of work happens at the &lt;em&gt;hourly&lt;/em&gt; scale. The resources, the technology, the time, and - critically - the leadership support are all there by default. You have an idea about how to make a program better, and the path from idea to evidence is measured in hours, not months. That isn&#39;t a perk; it&#39;s the point. We don&#39;t just teach the future of tech - we live it, building tools to think with, running the experiment, and letting the evidence change our minds.&lt;/p&gt;
+&lt;p&gt;I&#39;ve started to suspect the method is bigger than the program. Most program designs live on a slide and get tested on real people. We made the argument executable: you run your design forward under realistic conditions and watch where it bends before anyone&#39;s year depends on it. Any organization planning something high-stakes could do the same.&lt;/p&gt;
+&lt;h2&gt;We&#39;re Hiring&lt;/h2&gt;
+&lt;p&gt;If any of this resonates, come build it with us. Working at CodePath, you get to directly impact the next generation of technologists and influence the lives of people the industry has historically overlooked - and you get the resources, technology, time, and leadership support to do rigorous, meaningful work while you&#39;re at it.&lt;/p&gt;
+&lt;p&gt;You can review and apply for open roles on our job board: &lt;a href=&quot;https://job-boards.greenhouse.io/codepath&quot;&gt;job-boards.greenhouse.io/codepath&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Join me in the future of CS education.&lt;/p&gt;
+</content>
+  </entry>
+  <entry>
+    <title>Resurrecting a 2014 Codebase in 2026</title>
+    <link href="https://michaelwales.com/articles/resurrecting-a-2014-codebase-in-2026/"/>
+    <updated>2026-01-10T00:00:00Z</updated>
+    <id>https://michaelwales.com/articles/resurrecting-a-2014-codebase-in-2026/</id>
+    <content type="html">&lt;p&gt;For many developers, software projects never truly die - they just become harder and harder to touch. The code still exists; the ideas still matter; the content or functionality still has value. What disappears first is the ability to reasonably maintain that code. Over time, dependencies rot, build tools get abandoned, and the cognitive cost of even small changes steadily rises until the only sensible option seems to be &amp;quot;don’t touch it.&amp;quot; That was the state of this blog - not broken in concept, but brittle and immobilized under a decade of technical debt.&lt;/p&gt;
+&lt;p&gt;For years, this blog has had outdated information - locations, employers, etc. Simply because the technical overhead in getting things functional again didn&#39;t outweigh my other responsibilities nor the ability to just edit the source in Dev Tools and print to PDF whenever I needed a current resume.&lt;/p&gt;
+&lt;p&gt;When I set out to revive this blog, I wasn’t trying to resurrect a nostalgia project. What I was confronting was a classic technical debt problem: the system was stable enough to serve pages but too fragile to evolve. It was built on &lt;a href=&quot;http://wintersmith.io/&quot;&gt;Wintersmith&lt;/a&gt;, a static site generator that hasn’t seen meaningful maintenance in years; it used &lt;a href=&quot;https://bower.io/&quot;&gt;Bower&lt;/a&gt; for front-end dependencies; it relied on &lt;a href=&quot;https://momentjs.com/&quot;&gt;Moment.js&lt;/a&gt; for dates; and it had no modern deployment pipeline. Any attempt to update a post or add a new feature would require untangling all of these brittle pieces first. In other words, it was trapped in its own legacy. I wanted to see whether an AI assistant could help liberate it.&lt;/p&gt;
+&lt;p&gt;The approach I took with &lt;a href=&quot;https://claude.com/product/claude-code&quot;&gt;Claude Code&lt;/a&gt; was not to ask for guides or to tell it what the new architecture should look like, but to provide the entire repository and a single directive: make this buildable and deployable again on contemporary tooling. What followed was a migration process that, by traditional measures, would have taken a developer at least a few days of uninterrupted work - possibly longer if they needed to reacquaint themselves with tools that haven’t been in common use for years.&lt;/p&gt;
+&lt;p&gt;The first substantive change the AI applied was migrating away from Wintersmith to &lt;a href=&quot;https://www.11ty.dev/&quot;&gt;Eleventy&lt;/a&gt; 3.x. Eleventy has emerged as a robust, versatile static site generator that embraces simplicity and extensibility, making it an excellent destination for this kind of project. Claude reconstructed the directory structure into Eleventy’s conventions, organized templates into &lt;code&gt;_includes&lt;/code&gt;, applied readable date handling with &lt;a href=&quot;https://moment.github.io/luxon/#/&quot;&gt;Luxon&lt;/a&gt; instead of Moment, and rewrote syntax highlighting to use build-time &lt;a href=&quot;https://prismjs.com/&quot;&gt;Prism&lt;/a&gt; rather than client-side &lt;code&gt;highlight.js&lt;/code&gt;. Every one of these decisions reflects a modernization that reduces runtime complexity and improves maintainability.&lt;/p&gt;
+&lt;p&gt;At every step, the AI had to reason about context that typically only a human engineer would understand. When Eleventy failed to build because templates couldn’t find &lt;code&gt;base.njk&lt;/code&gt;, the system identified that Wintersmith’s layout placement did not align with Eleventy’s &lt;a href=&quot;https://mozilla.github.io/nunjucks/&quot;&gt;Nunjucks&lt;/a&gt; lookup paths and moved the files into a structure Eleventy expects. When initial GitHub Actions failed to trigger because the workflow was configured to watch the &lt;code&gt;main&lt;/code&gt; branch while the repository’s default branch was &lt;code&gt;master&lt;/code&gt;, Claude detected and corrected the discrepancy. Later, when the static site was being published to the wrong branch for GitHub Pages, the deploy workflow was updated to publish to &lt;code&gt;master&lt;/code&gt; instead of &lt;code&gt;main&lt;/code&gt; so that Pages would correctly serve the updated content. These are the kinds of integration and platform details that usually require reading documentation, trial and error, or painful debugging sessions; the AI internalized and applied them in real time.&lt;/p&gt;
+&lt;p&gt;Along the way, the repository was cleaned up: thousands of lines of obsolete configuration and unused assets were removed, replaced by a leaner, more modern codebase that reflected current best practices. A GitHub Actions workflow was introduced that builds and deploys the site automatically on push, eliminating the need for manual scripts.&lt;/p&gt;
+&lt;p&gt;The reason this matters is not because I was able to publish a blog post - it’s that a realistic, non-toy codebase was migrated, modernized, and restored to a state where it can be meaningfully improved again. Most abandoned projects don’t fail outright; they erode incrementally, and this erosion accumulates into a threshold beyond which no one wants to touch the code for fear of breaking something that nobody understands. Tools rot. Build processes become inscrutable. Developers forget the original mental model. What once might have taken a weekend of yak-shaving now can be addressed without painful context switching.&lt;/p&gt;
+&lt;p&gt;What this experience highlights is an evolution in developer productivity that goes beyond code generation. It’s not always about asking an AI assistant to write a new feature from scratch - it can be about using AI to restore the ability to reason about and work with existing systems. It can be about bringing a legacy codebase back into a form where the cost of change is low again. That unlocks a spectrum of opportunity: documentation sites that can finally be updated, internal tools that can be maintained without fear, prototypes that can be evolved into products, and so on. Instead of writing new code to replace old systems, we can now consider reviving them with far less investment than would have been plausible even a year ago.&lt;/p&gt;
+&lt;p&gt;This isn’t automation in the sense of replacing the developer. Throughout the process, I reviewed diffs, made architectural choices, accepted or rejected decisions based on intent and context. What the AI handled was the heavy lifting - the tedious, error-prone migrations and integration tweaks that typically occupy the margins of every significant change. With that burden reduced, developers are free to focus on what matters: reasoning about the user experience, the architecture, and the goals of the software itself.&lt;/p&gt;
+&lt;h2&gt;Technical Appendix&lt;/h2&gt;
+&lt;p&gt;This section exists for the people who want to understand not just that a legacy project was modernized, but how it was done and what kinds of transformations are now feasible with AI-assisted tooling.&lt;/p&gt;
+&lt;h3&gt;Repository-Level Modernization&lt;/h3&gt;
+&lt;p&gt;The original &lt;code&gt;michaelwales.com&lt;/code&gt; repository was structured around Wintersmith, Bower, and hand-rolled shell scripts. Its directory layout looked roughly like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;/contents
+/templates
+/plugins
+/bower_components
+/config.json
+/build.sh
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This layout assumed:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;a global Wintersmith installation,&lt;/li&gt;
+&lt;li&gt;front-end assets fetched via Bower,&lt;/li&gt;
+&lt;li&gt;runtime JavaScript for things like syntax highlighting and date formatting,&lt;/li&gt;
+&lt;li&gt;and a human running build and deploy scripts locally.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Claude migrated this into a contemporary Eleventy-based static site with a structure more like:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;/src
+  /_includes
+  /_data
+  /posts
+  /assets
+.eleventy.js
+package.json
+.github/workflows/deploy.yml
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This matters because it replaces implicit, tribal-knowledge-based build steps with explicit, reproducible infrastructure. Anyone who clones the repo can now run npm install and npm run build and get the same result, which is a non-negotiable requirement for sustainable software.&lt;/p&gt;
+&lt;h3&gt;Template Migration: Wintersmith to Nunjucks (Eleventy)&lt;/h3&gt;
+&lt;p&gt;Wintersmith templates were written in a dialect of Nunjucks but organized around layout inheritance rules that Eleventy does not share. For example, Wintersmith allowed templates to reference layouts by name regardless of location, while Eleventy requires layouts to live under &lt;code&gt;_includes&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Claude didn’t just convert syntax — it re-modeled the template graph.&lt;/p&gt;
+&lt;p&gt;A Wintersmith page like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{% extends &amp;quot;layout.html&amp;quot; %}
+{% block content %}
+  &amp;lt;article&amp;gt;
+    &amp;lt;h1&amp;gt;{{ title }}&amp;lt;/h1&amp;gt;
+    {{ contents | safe }}
+  &amp;lt;/article&amp;gt;
+{% endblock %}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Was converted into an Eleventy-compatible version like:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;---
+layout: base.njk
+---
+
+&amp;lt;article&amp;gt;
+  &amp;lt;h1&amp;gt;{{ title }}&amp;lt;/h1&amp;gt;
+  {{ content | safe }}
+&amp;lt;/article&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And the base layout was relocated into: &lt;code&gt;src/_includes/base.njk&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;So Eleventy’s resolver could actually find it. This is a perfect example of where most migrations stall: the syntax might be &amp;quot;compatible&amp;quot; but the tooling assumptions are not. AI was able to discover, test, and correct those mismatches iteratively.&lt;/p&gt;
+&lt;h3&gt;Syntax Highlighting: Runtime to Build Time&lt;/h3&gt;
+&lt;p&gt;Originally, syntax highlighting was done in the browser using highlight.js. Claude replaced this with Eleventy’s Prism integration, so code blocks are rendered as HTML during the build.&lt;/p&gt;
+&lt;p&gt;Before:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Browser downloads &lt;code&gt;highlight.js&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;DOM is scanned&lt;/li&gt;
+&lt;li&gt;Code blocks are post-processed&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;After:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Markdown → HTML with Prism classes at build time&lt;/li&gt;
+&lt;li&gt;Zero runtime cost&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This again reflects a broader pattern: AI naturally gravitates toward architectures that are simpler to reason about and less fragile in production.&lt;/p&gt;
+&lt;h3&gt;GitHub Actions: From Shell Scripts to CI&lt;/h3&gt;
+&lt;p&gt;The old deployment flow relied on shell scripts that pushed a built directory to GitHub Pages manually. Claude replaced this with a GitHub Actions workflow:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;name: Build and Deploy Eleventy Site
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run build
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: $
+          publish_dir: ./_site
+          publish_branch: master
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Two interesting things happened here:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;The AI initially assumed the default branch was main, then corrected itself when the workflow failed.&lt;/li&gt;
+&lt;li&gt;It discovered that GitHub Pages was serving from &lt;code&gt;master&lt;/code&gt;, not &lt;code&gt;gh-pages&lt;/code&gt;, and updated the deploy target accordingly.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;That kind of &amp;quot;platform awareness&amp;quot; is exactly what makes legacy projects so expensive to maintain — and what AI is now able to absorb.&lt;/p&gt;
+&lt;h3&gt;Codebase Shrinkage as a Signal&lt;/h3&gt;
+&lt;p&gt;One of the strongest signals of success was the net change in the repository:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;~35,000 lines removed&lt;/li&gt;
+&lt;li&gt;~2,000 lines added&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Most of what disappeared was:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;vendored libraries,&lt;/li&gt;
+&lt;li&gt;legacy build glue,&lt;/li&gt;
+&lt;li&gt;unused scripts,&lt;/li&gt;
+&lt;li&gt;obsolete configs.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;What replaced it was:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;a modern dependency graph,&lt;/li&gt;
+&lt;li&gt;a single, readable build pipeline,&lt;/li&gt;
+&lt;li&gt;and a small, understandable project footprint.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That ratio is what real modernization looks like.&lt;/p&gt;
+&lt;h3&gt;Why This Works Now&lt;/h3&gt;
+&lt;p&gt;None of this required &amp;quot;understanding&amp;quot; in the human sense. What the AI brought was something else: the ability to navigate, simulate, and adapt complex systems quickly enough that exploration is cheap.&lt;/p&gt;
+&lt;p&gt;This is what makes old codebases newly valuable. They don’t need to be rewritten; they need to be translated forward.&lt;/p&gt;
+&lt;p&gt;That’s the real unlock.&lt;/p&gt;
+&lt;h3&gt;Some Fun Things to Note&lt;/h3&gt;
+&lt;p&gt;I have a lot of experience with AI in the form of OpenAI&#39;s/Anthropic&#39;s chatbots, or Cursor&#39;s/Windsurf&#39;s/VSCode&#39;s in-IDE experiences, but my history with agentic AI experiences is pretty minimal right now - probably limited to various iterations of &lt;a href=&quot;https://github.com/bmad-code-org/BMAD-METHOD&quot;&gt;BMAD&lt;/a&gt; in all of the tools previously mentioned.&lt;/p&gt;
+&lt;p&gt;Claude Code did phenomenally well here and I&#39;m happy with the results, but I was surprised as how quickly I burned through all of my tokens for a 6-hour block of time (Claude Pro). I did use Opus and planning mode for the first prompt or two, until I felt like I understood the plan it was coming up with and trusted it to &amp;quot;just go do things&amp;quot; - more experimentation is in order on my part to figure out the best times to opt-in to the more resource intensive compute.&lt;/p&gt;
+</content>
+  </entry>
+  <entry>
+    <title>Make .gitconfig Work for You</title>
+    <link href="https://michaelwales.com/articles/make-gitconfig-work-for-you/"/>
+    <updated>2014-03-19T00:00:00Z</updated>
+    <id>https://michaelwales.com/articles/make-gitconfig-work-for-you/</id>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;http://git-scm.com/&quot;&gt;Git&lt;/a&gt; has undoubtedly become one of the most important tools within any Web Developer&#39;s bag of tricks, arguably due to amazing success of &lt;a href=&quot;http://github.com/&quot;&gt;GitHub&lt;/a&gt;. Unfortunately, Git can be quite overwhelming - particularly for those developers new to &lt;em&gt;distributed&lt;/em&gt; version control systems.&lt;/p&gt;
+&lt;p&gt;This complexity leads some developers to seek out graphical Git clients to assist them in managing their workflow correctly. Although there are a great number of excellent GUI-based clients, I&#39;ve always enjoyed using the command line instead. It&#39;s through the command line tools that Git&#39;s true power, and flexibility, shine through and today I&#39;d like to discuss one of Git&#39;s strongest &amp;quot;utilities&amp;quot;: the &lt;code&gt;.gitconfig&lt;/code&gt; file.&lt;/p&gt;
+&lt;p&gt;A &lt;code&gt;.gitconfig&lt;/code&gt; file can reside in up to three locations within your filesystem, the location determining the scope in which the file&#39;s contents are considered:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Global (&lt;code&gt;~/.gitconfig&lt;/code&gt;): The most common use, establishes global configuration options for a particular user.&lt;/li&gt;
+&lt;li&gt;System (&lt;code&gt;/etc/.gitconfig&lt;/code&gt;): Rarely used, establishes configuration options for the entirety of the local system (all users on this computer).&lt;/li&gt;
+&lt;li&gt;Local (&lt;code&gt;~/Projects/this-project/.gitconfig&lt;/code&gt;): A the repository level, establishes configuration options that only affect this repository. If this file were committed, the settings contained within would impact all users that clone this repository.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Since we&#39;re primarily interested in making configuration changes that will make our own lives easier, without affecting other users, we&#39;ll focus on the global &lt;code&gt;.gitconfig&lt;/code&gt; file. You should first check to see if you have a &lt;code&gt;.gitconfig&lt;/code&gt; file within your home directory and create one if you do not (Unix commands provided, Windows users should make the appropriate modifications as necessary):&lt;/p&gt;
+&lt;pre class=&quot;language-shell&quot;&gt;&lt;code class=&quot;language-shell&quot;&gt;$ &lt;span class=&quot;token function&quot;&gt;cat&lt;/span&gt; ~/.gitconfig
+cat: /Users/mike/.gitconfig: No such &lt;span class=&quot;token function&quot;&gt;file&lt;/span&gt; or directory
+
+$ &lt;span class=&quot;token function&quot;&gt;touch&lt;/span&gt; ~/.gitconfig&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;Common Endpoint Shortcuts&lt;/h2&gt;
+&lt;p&gt;Although GitHub is by far the most popular place to host a repository there are a number of other options. &lt;a href=&quot;http://bitbucket.org/&quot;&gt;BitBucket&lt;/a&gt; is a popular provider for many businesses, primarily because their pricing model focuses on number of users rather than if a repository is public or private (in other words, unlimited free private repositories). &lt;a href=&quot;http://gist.github.com/&quot;&gt;Gist&lt;/a&gt;, a GitHub service, is great for hosting quick snippets of code that don&#39;t really need to be associated with a huge project - each snippet is its own fully functional repository.&lt;/p&gt;
+&lt;p&gt;Throughout the course of a day, I could be interacting with repositories from a number of providers. Having to type out the full URL, and undoubtedly fat-fingering those URLs a few times, would not only be a huge annoyance but could actually kill off a few precious minutes each and every day. Fortunately, we can configure shortcuts within our &lt;code&gt;.gitconfig&lt;/code&gt; file using the &lt;code&gt;url.insteadOf&lt;/code&gt; setting. In the following examples, I have configure the &lt;code&gt;gh:&lt;/code&gt;, &lt;code&gt;bb:&lt;/code&gt; and &lt;code&gt;gist:&lt;/code&gt; shortcuts to point to their full URL:&lt;/p&gt;
+&lt;pre class=&quot;language-ini&quot;&gt;&lt;code class=&quot;language-ini&quot;&gt;&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;url &quot;https://github.com/&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;insteadOf&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;gh:&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;url &quot;https://gist.github.com/&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;insteadOf&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;gist:&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;url &quot;https://bitbucket.org/&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;insteadOf&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;bb:&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;With this configuration in place, here&#39;s how I would then clone a few example repositories (notice how I&#39;m only having to concern myself with the namespace and project name of the repository I am cloning):&lt;/p&gt;
+&lt;pre class=&quot;language-shell&quot;&gt;&lt;code class=&quot;language-shell&quot;&gt;$ &lt;span class=&quot;token function&quot;&gt;git&lt;/span&gt; clone gh:walesmd/walesmd.github.io
+
+$ &lt;span class=&quot;token function&quot;&gt;git&lt;/span&gt; clone gist:walesmd/7315613
+
+$ &lt;span class=&quot;token function&quot;&gt;git&lt;/span&gt; clone bb:walesmd/codeigniter-erkana-auth&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;Colored Output&lt;/h2&gt;
+&lt;p&gt;If you&#39;ve put a lot of hard work into building out the perfect shell prompt, like I have (a topic for a future post) you may find Git&#39;s monochromatic responses to be a bit dull. Not only does coloring provide an aesthetic appeal it can prove to be quite functional as well. We instinctively associate the color green with success or that everything is okay; inversely, red indicates a warning or a problem. I&#39;ve configured a number of various colors within my own &lt;code&gt;.gitconfig&lt;/code&gt; to help me easily identify changes to a repository, identify branches and more.&lt;/p&gt;
+&lt;pre class=&quot;language-ini&quot;&gt;&lt;code class=&quot;language-ini&quot;&gt;&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;color&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;ui&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;true&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;color &quot;branch&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;current&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;yellow reverse&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;local&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;yellow&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;remote&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;green&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;color &quot;diff&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;meta&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;yellow bold&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;frag&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;magenta bold&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;old&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;red bold&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;green bold&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;color &quot;status&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;added&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;yellow&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;changed&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;green&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;untracked&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;red&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;Aliases&lt;/h2&gt;
+&lt;p&gt;My first introduction to distributed version control was with &lt;a href=&quot;http://mercurial.selenic.com/&quot;&gt;Mercurial&lt;/a&gt;, whose commands come with a number of shortcuts (&lt;code&gt;ci&lt;/code&gt; for commit, &lt;code&gt;br&lt;/code&gt; to list branches, etc). A number of these shortcuts were muscle memory by the time I made the transition to Git, so I needed a way to port these various shortcuts over. Once again, Git promises to deliver in the form of aliases.&lt;/p&gt;
+&lt;p&gt;You may have seen various aliases provided in other articles, typically in the form of a single command within your shell. &lt;code&gt;git config --global alias.ci commit&lt;/code&gt;, for example creates a new alias (&lt;code&gt;ci&lt;/code&gt;) associated with &lt;code&gt;commit&lt;/code&gt;. But, did you know these commands aren&#39;t doing anything that special or magical to your Git environment? In fact, &lt;code&gt;git config&lt;/code&gt; is simply a command to read and write to various config files, &lt;code&gt;.gitconfig&lt;/code&gt; included (and with the &lt;code&gt;--global&lt;/code&gt; switch, we make sure we&#39;re editing &lt;code&gt;~/.gitconfig&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;Below I&#39;ve provided a number of my favorite aliases, with inline comments to futher explain those that may be a bit confusing. As you review this list, take note of any alias definitions that are preceded by a &lt;code&gt;!&lt;/code&gt;. This tells git to run that entire command is if it had been entered directly within a shell and is required if you are piping results or running multiple commands:&lt;/p&gt;
+&lt;pre class=&quot;language-ini&quot;&gt;&lt;code class=&quot;language-ini&quot;&gt;&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;alias&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token comment&quot;&gt;# Add and remove all changes, note how this alias is calling another alias&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;addremove&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git r &amp;amp;&amp;amp; git add . --all&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Show all of my configured aliases&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;aliases&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git config --list | grep &#39;alias&#92;&#92;.&#39; | sed &#39;s/alias&#92;&#92;.&#92;&#92;([^=]*&#92;&#92;)=&#92;&#92;(.*&#92;&#92;)/&#92;&#92;1&#92;&#92; &#92;t =&gt; &#92;&#92;2/&#39; | sort&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# For when you made that commit a bit too early, amend&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;amend&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Show all branches&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;br&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;branch -av&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Show the current branch name (usefull for shell prompts)&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;brname&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git branch | grep &quot;^*&quot; | awk &#39;{ print $2 }&#39;&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Delete a branch&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;brdel&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;branch -D&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Which files are receiving the most &quot;love&quot;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;churn&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git log --all -M -C --name-only --format=&#39;format:&#39; &quot;$@&quot; | sort | grep -v &#39;^$&#39; | uniq -c | sort | awk &#39;BEGIN {print &quot;count,file&quot;} {print $1 &quot;,&quot; $2}&#39;&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# View the log and diff for a commit (previous if no SHA1 provided)&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;details&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;log -n1 -p --format=fuller&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Save a repo as a tarball&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;archive -o latest.tar.gz -9 --prefix=latest/&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Unstage changes from the index&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;unstage&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;reset HEAD --&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# View a pretty git log with branch tree&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;g&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git log --graph --pretty=format:&#39;%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)&amp;lt;%an&gt;%Creset&#39; --abbrev-commit --date=relative&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Return a list of commit SHA1s&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;&quot;&lt;span class=&quot;token inner-value&quot;&gt;!f() { git log $* | grep &#39;^commit &#39; | cut -f 2 -d &#39; &#39;; }; f&lt;/span&gt;&quot;&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Remove deleted files&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git ls-files -z --deleted | xargs -0 git rm&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Return the repository&#39;s root directory (usefull for shell prompts)&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;root&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;rev-parse --show-toplevel&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Update all submodules&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;subup&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;submodule update --init&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# List all tags&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;tags&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;tag -l&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Start a new local repository and perform initial commit&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;this&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git init &amp;amp;&amp;amp; git add . &amp;amp;&amp;amp; git commmit -m &#92;&quot;Initial commit.&#92;&quot;&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;# Thin out older metadata within the repository, reduceses filesystem footprint&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;trim&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git reflog expire --expire=now --all &amp;amp;&amp;amp; git gc --prune=now&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;My Complete &lt;code&gt;.gitconfig&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;I haven&#39;t covered every single entry within my &lt;code&gt;.gitconfig&lt;/code&gt; file, just what I believe have been some of the most helpful changes I&#39;ve made. If you&#39;re interested in reviewing my entire file, I present to you:&lt;/p&gt;
+&lt;pre class=&quot;language-ini&quot;&gt;&lt;code class=&quot;language-ini&quot;&gt;&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;alias&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;addremove&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git r &amp;amp;&amp;amp; git add . --all&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;aliases&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git config --list | grep &#39;alias&#92;&#92;.&#39; | sed &#39;s/alias&#92;&#92;.&#92;&#92;([^=]*&#92;&#92;)=&#92;&#92;(.*&#92;&#92;)/&#92;&#92;1&#92;&#92; &#92;t =&gt; &#92;&#92;2/&#39; | sort&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;all&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;add . --all&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;amend&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;br&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;branch -av&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;brname&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git branch | grep &quot;^*&quot; | awk &#39;{ print $2 }&#39;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;brdel&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;branch -D&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;ci&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;commit&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;changes&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;&quot;&lt;span class=&quot;token inner-value&quot;&gt;!f() { git log --pretty=format:&#39;* %s&#39; $1..$2; }; f&lt;/span&gt;&quot;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;churn&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git log --all -M -C --name-only --format=&#39;format:&#39; &quot;$@&quot; | sort | grep -v &#39;^$&#39; | uniq -c | sort | awk &#39;BEGIN {print &quot;count,file&quot;} {print $1 &quot;,&quot; $2}&#39;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;co&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;checkout&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;details&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;log -n1 -p --format=fuller&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;archive -o latest.tar.gz -9 --prefix=latest/&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;unstage&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;reset HEAD --&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;g&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git log --graph --pretty=format:&#39;%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)&amp;lt;%an&gt;%Creset&#39; --abbrev-commit --date=relative&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;pull --dry-run&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;&quot;&lt;span class=&quot;token inner-value&quot;&gt;!f() { git log $* | grep &#39;^commit &#39; | cut -f 2 -d &#39; &#39;; }; f&lt;/span&gt;&quot;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;log --branches --not --remotes&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git ls-files -z --deleted | xargs -0 git rm&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;root&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;rev-parse --show-toplevel&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;st&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;status&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;subup&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;submodule update --init&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;tags&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;tag -l&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;this&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git init &amp;amp;&amp;amp; git add . &amp;amp;&amp;amp; git commit -m &#92;&quot;Initial commit.&#92;&quot;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;trim&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;!git reflog expire --expire=now --all &amp;amp;&amp;amp; git gc --prune=now&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;credential&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;helper&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;osxkeychain&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;color&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;ui&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;true&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;color &quot;branch&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;current&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;yellow reverse&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;local&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;yellow&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;remote&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;green&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;color &quot;diff&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;meta&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;yellow bold&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;frag&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;magenta bold&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;old&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;red bold&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;green bold&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;color &quot;status&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;added&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;yellow&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;changed&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;green&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;untracked&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;red&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;core&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;autocrlf&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;input&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;compression&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;9&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;excludesfile&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;~/.gitignore_global&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;filemode&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;false&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;diff&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;mnemonicprefix&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;true&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;merge&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;log&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;true&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;ff&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;false&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;simple&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;url &quot;https://bitbucket.org/&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;insteadOf&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;bb:&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;url &quot;https://github.com/&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;insteadOf&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;gh:&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;url &quot;https://gist.github.com/&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;insteadOf&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;gist:&lt;/span&gt;
+
+&lt;span class=&quot;token section&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token section-name selector&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;Michael Wales&lt;/span&gt;
+    &lt;span class=&quot;token key attr-name&quot;&gt;email&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token value attr-value&quot;&gt;webmaster@michaelwales.com&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+</content>
+  </entry>
+  <entry>
+    <title>Learn Web Development, First</title>
+    <link href="https://michaelwales.com/articles/learn-web-development-first/"/>
+    <updated>2014-02-20T00:00:00Z</updated>
+    <id>https://michaelwales.com/articles/learn-web-development-first/</id>
+    <content type="html">&lt;p&gt;I recently read Rob Conery&#39;s &lt;em&gt;&lt;a href=&quot;http://www.wekeroad.com/2014/02/18/i-had-a-choice-php-or-net/&quot;&gt;PHP or ASP.NET: Did I Do The Right Thing?&lt;/a&gt;&lt;/em&gt; Although it does a great job uncovering how a developer can literally lose half a decade of their life by focusing their efforts towards the wrong technologies, I can&#39;t help but feel as if Rob is still asking himself the wrong questions, focusing on symptoms rather than the problem itself.&lt;/p&gt;
+&lt;p&gt;Toward the end of the article Rob imagines five ways his professional life would be better today, had he not focused on ASP.NET (presumably, if he had focused on PHP):&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;Know Linux a whole lot better&lt;/li&gt;
+&lt;li&gt;Be very familiar with MySQL and other open databases&lt;/li&gt;
+&lt;li&gt;Be less scared of JavaScript than I was 4 years ago&lt;/li&gt;
+&lt;li&gt;Be less reliant on an IDE&lt;/li&gt;
+&lt;li&gt;Love HTML and CSS&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Let that sink in for a moment... here we have a Web Developer that is/was scared of JavaScript, doesn&#39;t enjoy HTML or CSS, is unfamiliar with open source databases and is arguably uncomfortable with Linux. &lt;strong&gt;These are the very foundations upon which the web was built!&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;By no means are my intentions to pick on Rob - I don&#39;t know him personally, nor am I familiar with his work; rather, I look to him as an example (and I believe this was his intent with his article).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;The framework doesn&#39;t matter.&lt;/strong&gt; Whether it&#39;s PHP, Rails, ASP.NET or NodeJS - these are just proxies by which you write software for the web and the languages of the web are HTML, CSS and JavaScript. If you&#39;re not comfortable, I dare say in &lt;em&gt;love&lt;/em&gt; with these three languages, you&#39;re not a Web Developer.&lt;/p&gt;
+&lt;p&gt;By all means, you may be the best PHP developer the world has ever known; you&#39;ll find a job in which you are a mentor to those that work with you, you&#39;ll live comfortably and you&#39;ll love the work that you&#39;re doing. But, if there&#39;s one fact within the world of web development it is this: frameworks/languages, which are nothing more than varying syntaxes to achieve the same result, come and go.&lt;/p&gt;
+&lt;p&gt;In a few years, your product will be forced to evolve as the industry continues to evolve. As history has shown us, this more than likely will lead to a new languge or framework, a new way of thinking; the only constant within this vicious cycle are HTML, CSS and JavaScript. As you&#39;re packing up your belongings into a box you&#39;ll look back at the remainder of your team, the &lt;strong&gt;Web Developers&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;If you&#39;re just starting out, or perhaps you describe yourself as one of these &lt;strong&gt;silo developers&lt;/strong&gt; - only focused on a single technology - I encourage you to focus on the basics. Learn web development, first; then, feel free to explore various supporting languages.&lt;/p&gt;
+&lt;p&gt;Consider this: would you trust a surgeon or specialist, knowing they completely ignored the foundation of general medicine?&lt;/p&gt;
+</content>
+  </entry>
+  <entry>
+    <title>Getting Started with GulpJS</title>
+    <link href="https://michaelwales.com/articles/getting-started-with-gulpjs/"/>
+    <updated>2014-02-12T00:00:00Z</updated>
+    <id>https://michaelwales.com/articles/getting-started-with-gulpjs/</id>
+    <content type="html">&lt;p&gt;Like many others, I incorporated a task runner (namely &lt;a href=&quot;http://gruntjs.com/&quot;&gt;GruntJS&lt;/a&gt;) into my workflow some time ago. If you tend to use &amp;quot;preprocessed languages&amp;quot; like &lt;a href=&quot;http://coffeescript.org/&quot;&gt;CoffeeSript&lt;/a&gt;, &lt;a href=&quot;http://lesscss.org/&quot;&gt;LESS&lt;/a&gt; or &lt;a href=&quot;http://sass-lang.com/&quot;&gt;Sass&lt;/a&gt; it&#39;s virtually a requirement in maintaining your sanity. Although I prefer sticking to vanilla JavaScript and CSS, introducing this step into my development cycle has certainly paid off in man-hours saved alone. Tasks such as linting or minification during the build process, previously requiring text editor plugins or an array of terminal commands to remember, are now diminished to mere after-thoughts. Best of all, these tasks can now be versioned within your project&#39;s repository ensuring a consistent result despite varying environments in which a task may be run.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://michaelwales.com/articles/getting-started-with-gulpjs/grunt-logo.png&quot; class=&quot;align-right&quot; width=&quot;200&quot; /&gt;For some time now, GruntJS has been the de-facto task runner. It&#39;s &lt;a href=&quot;http://gruntjs.com/plugins&quot;&gt;plugin respository&lt;/a&gt; boasts more than 2,200 available plugins, 27 of which are officially maintained by the GruntJS team and cover the most common of tasks such as &lt;a href=&quot;https://npmjs.org/package/grunt-contrib-jshint&quot;&gt;running JSHint&lt;/a&gt;, &lt;a href=&quot;https://npmjs.org/package/grunt-contrib-concat&quot;&gt;concatenating files&lt;/a&gt;, &lt;a href=&quot;https://npmjs.org/package/grunt-contrib-coffee&quot;&gt;compiling CoffeeScript&lt;/a&gt; and much more. Nevertheless, the developers at &lt;a href=&quot;http://wearefractal.com/&quot;&gt;Fractal&lt;/a&gt; felt the need for an additional option, pairing their own unique ideas with &lt;a href=&quot;http://nodejs.org/api/stream.html&quot;&gt;NodeJS&#39; Streams API&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://michaelwales.com/articles/getting-started-with-gulpjs/gulp-logo.png&quot; class=&quot;align-left&quot; width=&quot;100&quot; /&gt;Their efforts have resulted in &lt;a href=&quot;http://gulpjs.com/&quot;&gt;Gulp&lt;/a&gt;, an amazingly fast task runner, and it&#39;s gained quite a following amongst developers with nearly &lt;a href=&quot;http://gulpjs.com/plugins&quot;&gt;300 plugins of its own&lt;/a&gt;. Not only do Gulp tasks execute much quicker than comparative Grunt tasks, but I&#39;ve found the process of actually writing tasks much simpler. I spend less time managing a project&#39;s supporting toolset, allowing me to focus on the most important goal: shipping.&lt;/p&gt;
+&lt;p&gt;Unlike Grunt, in which tasks are defined via a rather verbose configuration API, in Gulp you&#39;re just writing plain ol&#39; JavaScript - you &lt;em&gt;program&lt;/em&gt; your tasks, rather than &lt;em&gt;configure&lt;/em&gt; them. Consider the following &lt;code&gt;gruntfile.js&lt;/code&gt; that runs JSHint, minifies and concatenates every JavaScript file within a directory:&lt;/p&gt;
+&lt;pre class=&quot;language-javascript&quot;&gt;&lt;code class=&quot;language-javascript&quot;&gt;module&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function-variable function&quot;&gt;exports&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token parameter&quot;&gt;grunt&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    grunt&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;initConfig&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;token literal-property property&quot;&gt;pkg&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; grunt&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;file&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;readJSON&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;package.json&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+
+        &lt;span class=&quot;token literal-property property&quot;&gt;jshint&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;token literal-property property&quot;&gt;files&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;src/js/*.js&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;token literal-property property&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;token literal-property property&quot;&gt;jshintrc&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token boolean&quot;&gt;true&lt;/span&gt;
+            &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+
+        &lt;span class=&quot;token literal-property property&quot;&gt;concat&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;token literal-property property&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;token literal-property property&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;src/js/*.js&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;token literal-property property&quot;&gt;dest&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&#39;build/app.js&#39;&lt;/span&gt;
+            &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+
+        &lt;span class=&quot;token literal-property property&quot;&gt;uglify&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;token literal-property property&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;token literal-property property&quot;&gt;files&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;token string-property property&quot;&gt;&#39;build/app.min.js&#39;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;&amp;lt;%= concat.build.dest %&gt;&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;
+                &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+
+    grunt&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;loadNpmTasks&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;grunt-contrib-jshint&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+    grunt&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;loadNpmTasks&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;grunt-contrb-concat&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+    grunt&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;loadNpmTasks&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;grunt-contrib-uglify&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+
+    grunt&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;registerTask&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;default&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;jshint&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&#39;concat&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&#39;uglify&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;To do the same, using Gulp:&lt;/p&gt;
+&lt;pre class=&quot;language-javascript&quot;&gt;&lt;code class=&quot;language-javascript&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;var&lt;/span&gt; gulp &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;gulp&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    jshint &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;gulp-jshint&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    concat &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;gulp-concat&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    uglify &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;gulp-uglify&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+
+gulp&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;task&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;jshint&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    gulp&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;src/js/*.js&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;pipe&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;jshint&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;pipe&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;jshint&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;reporter&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;default&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+
+gulp&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;task&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;build&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;return&lt;/span&gt; gulp&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;src/js/*.js&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;pipe&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;concat&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;build/app.js&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;pipe&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;uglify&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;pipe&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;gulp&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;dest&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;build/app.min.js&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+
+gulp&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;task&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;default&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    gulp&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#39;jshint&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&#39;build&#39;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I find this much easier to understand and, more importantly, modify. Rather than worry about performing a task within the strict confines of an API, which often leads to temporary directories and files as tasks become dependent upon the output of other tasks, we&#39;re just piping streams through modification functions. There&#39;s no need to distinguish between a plugin&#39;s native tasks and the project&#39;s tasks - a task is a task is a task.&lt;/p&gt;
+&lt;p&gt;If you&#39;d like to give Gulp a spin, perhaps rewrite one of your own Gruntfiles (don&#39;t worry, the two can live side-by-side without conflict), the installation is just as simple as most other node packages.&lt;/p&gt;
+&lt;p&gt;First, install gulp globally:&lt;/p&gt;
+&lt;pre class=&quot;language-shell&quot;&gt;&lt;code class=&quot;language-shell&quot;&gt;&lt;span class=&quot;token function&quot;&gt;npm&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;install&lt;/span&gt; &lt;span class=&quot;token parameter variable&quot;&gt;-g&lt;/span&gt; gulp&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Then, install gulp and gulp-util in your project&#39;s devDependenies:&lt;/p&gt;
+&lt;pre class=&quot;language-shell&quot;&gt;&lt;code class=&quot;language-shell&quot;&gt;&lt;span class=&quot;token function&quot;&gt;npm&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;install&lt;/span&gt; --save-dev gulp gulp-util&lt;/code&gt;&lt;/pre&gt;
+</content>
+  </entry>
+</feed>
